@@ -1,6 +1,6 @@
 # Go Command and Control (C2) Server and Payload
 
-[![Go](https://img.shields.io/badge/Go-1.21+-00ADD8.svg?style=flat-square&logo=go)](https://golang.org/)
+[![Go](https://img.shields.io/badge/Go-1.24+-00ADD8.svg?style=flat-square&logo=go)](https://golang.org/)
 [![License](https://img.shields.io/badge/License-Apache%202.0-blue.svg?style=flat-square)](https://opensource.org/licenses/Apache-2.0)
 
 A simple Command and Control (C2) server and payload written in Go. The server listens for incoming TCP connections on port 8080 and executes commands received from the payload client, returning the output. This project is designed for educational purposes and to demonstrate basic network programming in Go.
