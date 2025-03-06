@@ -1,4 +1,4 @@
-# Go C2 Server and Payload
+# Go Command and Control (C2) Server and Payload
 
 [![Go](https://img.shields.io/badge/Go-1.21+-00ADD8.svg?style=flat-square&logo=go)](https://golang.org/)
 [![License](https://img.shields.io/badge/License-Apache%202.0-blue.svg?style=flat-square)](https://opensource.org/licenses/Apache-2.0)
@@ -32,10 +32,10 @@ This project is intended **solely for educational purposes and ethical security 
 ## Usage
 
 1. Clone the repository:
-   ```bash
-   git clone https://github.com/had-nu/Go-ServerC2-Payload.git
-   cd Go-ServerC2-Payload
-   ```
+```bash
+git clone https://github.com/had-nu/Go-ServerC2-Payload.git
+cd Go-ServerC2-Payload
+```
 2. Start the server
 ``` bash
 go run server.go
@@ -83,6 +83,34 @@ Response sent: 1: lo: <LOOPBACK,UP,LOWER_UP> mtu 65536 qdisc noqueue state UNKNO
        valid_lft forever preferred_lft forever
 [... truncated ...]
 ```
+
+---
+## Limitations
+
+While functional for educational purposes, this C2 server and payload system has several notable limitations:
+
+1. **Static Command List in Earlier Versions**  
+   The payload contained a static list (`commands := []string{...}`) that was executed sequentially, limiting flexibility. While this has been improved to allow remote command execution, older versions lacked the ability to dynamically receive commands from the server.
+
+2. **Platform Dependency**  
+   The current implementation is tailored for Linux, using `/bin/sh` for command execution. It does not natively support other operating systems like Windows or macOS without manual adjustments to the command execution logic.
+
+3. **Lack of Encryption**  
+   Communication between the server and payload is unencrypted, making it vulnerable to interception or tampering over unsecured networks. Sensitive data or commands could be exposed to attackers without additional security measures like TLS.
+
+4. **Single-Threaded Command Handling**  
+   The server processes commands from a single client sequentially in each connection. It cannot handle multiple payloads concurrently without significant delays, limiting scalability for scenarios involving multiple compromised machines.
+
+## Future improvements
+
+1. **Remote Command Execution**  
+   Modify the payload to act as a persistent client that connects to the C2 server and waits for commands sent remotely. The payload would execute these commands on the compromised machine and return the results to the server.
+
+2. **Cross-Platform Support**  
+   Enhance the payload and server to detect the operating system (e.g., using `runtime.GOOS`) and adapt command execution accordingly (e.g., `/bin/sh` for Linux, `cmd.exe` for Windows). This would make the tool versatile across different environments.
+
+3. **Encryption with TLS**  
+   Implement Transport Layer Security (TLS) to encrypt communication between the server and payload. This would prevent eavesdropping and ensure that commands and responses remain confidential, making the system more secure for real-world testing scenarios.
 
 ---
 ### License
