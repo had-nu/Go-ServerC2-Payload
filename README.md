@@ -32,19 +32,19 @@ This project is intended **solely for educational purposes and ethical security 
 ## Usage
 
 1. Clone the repository:
-```bash
-git clone https://github.com/had-nu/Go-ServerC2-Payload.git
-cd Go-ServerC2-Payload
-```
+	```bash
+	git clone https://github.com/had-nu/Go-ServerC2-Payload.git
+	cd Go-ServerC2-Payload
+	```
 2. Start the server
-``` bash
-go run server.go
-```
+	``` bash
+	go run server.go
+	```
 
 3. Run the payload
-``` bash
-go run payload.go
-```
+	``` bash
+	go run payload.go
+	```
 
 The payload will connect to the server (`default: 127.0.0.1:8080`), send commands, and display the responses with a 2-second delay between each command.
 
