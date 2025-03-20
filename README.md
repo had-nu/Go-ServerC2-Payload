@@ -19,6 +19,8 @@ Both components use `bufio.Reader` for robust handling of variable-length input/
 
 This project is intended **solely for educational purposes and ethical security research**. It demonstrates basic C2 functionality and should only be used in controlled environments where you have explicit permission to test (e.g., your own systems or networks). Unauthorized use of this code to harm systems, networks, or individuals is strictly prohibited and illegal. It’s open for collaboration, but use it responsibly in authorised settings only. My intent is to empower security pros and students, not enable misuse.
 
+See the Code of Conduct file.
+
 **Use responsibly and ethically.**
 
 ---
