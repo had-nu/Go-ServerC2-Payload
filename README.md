@@ -3,21 +3,25 @@
 [![Go](https://img.shields.io/badge/Go-1.24+-00ADD8.svg?style=flat-square&logo=go)](https://golang.org/)
 [![License](https://img.shields.io/badge/License-Apache%202.0-blue.svg?style=flat-square)](https://opensource.org/licenses/Apache-2.0)
 
-A simple Command and Control (C2) server and payload written in Go. The server listens for incoming TCP connections on port 8080 and executes commands received from the payload client, returning the output. This project is designed for educational purposes and to demonstrate basic network programming in Go.
+A Command and Control (C2) suite written in Go. This project implements a modern HTTP Beacon architecture designed for educational purposes and to demonstrate Linux-specific evasion techniques. It consists of a central **Team Server** and an HTTP polling **Beacon** payload.
 
 ## Description
 
 This repository contains two main components:
-- **`server.go`**: A TCP server that listens on port 8080, accepts commands from clients, and executes them using the system's shell (`/bin/sh` on Linux). It supports multiple commands per connection.
-- **`payload.go`**: A client that connects to the server, sends a predefined list of commands, and displays the responses.
+- **`main/server/server.go` (Team Server)**: An HTTP REST server that acts as the central hub. It listens on port `:8080` for Beacon check-ins, tracks active agents, and provides an interactive `readline`-based CLI for the operator to issue commands.
+- **`main/beacon/payload.go` (Beacon)**: A stealthy Linux client that connects to the Team Server. It periodically polls the server for tasks using an unpredictable Sleep and Jitter cycle, executes commands via `/bin/bash`, and returns the output to the server.
 
-Both components use `bufio.Reader` for robust handling of variable-length input/output and are configured for Linux environments.
+### Key Features
+* **HTTP Beaconing:** Communication operates over standard HTTP `GET`/`POST` requests, mimicking normal web traffic rather than dropping raw TCP sockets.
+* **Sleep & Jitter:** The beacon does not use static sleep intervals. It calculates a dynamic sleep duration (Base 10s + 20% Jitter) for each check-in, breaking network pattern recognition signatures.
+* **Process Spoofing (`prctl`):** Upon execution, the payload aggressively alters its own process name to `[kworker/u4:2]`, allowing it to blend into Linux process lists alongside legitimate kernel worker threads.
+* **Operator Console:** The Team Server features an interactive shell to view alive/dead agents and directly drop into sessions to queue tasks.
 
 ---
 
 ## Ethical Hacking Disclaimer
 
-This project is intended **solely for educational purposes and ethical security research**. It demonstrates basic C2 functionality and should only be used in controlled environments where you have explicit permission to test (e.g., your own systems or networks). Unauthorized use of this code to harm systems, networks, or individuals is strictly prohibited and illegal. It’s open for collaboration, but use it responsibly in authorised settings only. My intent is to empower security pros and students, not enable misuse.
+This project is intended **solely for educational purposes and ethical security research**. It demonstrates C2 functionality and Linux evasion mechanisms. It should only be used in controlled environments where you have explicit permission to test (e.g., your own systems or networks). Unauthorized use of this code to harm systems, networks, or individuals is strictly prohibited and illegal. 
 
 See the Code of Conduct file.
 
@@ -29,7 +33,6 @@ See the Code of Conduct file.
 
 - Go 1.24 or later installed (`go version` to check).
 - A Linux environment (tested on Ubuntu/Debian).
-- Basic networking setup (ensure port 8080 is open and accessible).
 
 ## Usage
 
@@ -38,81 +41,62 @@ See the Code of Conduct file.
 	git clone https://github.com/had-nu/Go-ServerC2-Payload.git
 	cd Go-ServerC2-Payload
 	```
-2. Start the server
-	``` bash
-	go run server.go
+2. Start the Team Server:
+	```bash
+	go run main/server/server.go
+	```
+	*The server will start on port `8080` and provide a `c2>` prompt.*
+
+3. Compile the Beacon Payload:
+	To take full advantage of the evasion techniques, the payload should be built stripping all symbolic and DWARF debugging information.
+	```bash
+	go build -ldflags="-s -w" -o beacon main/beacon/payload.go
 	```
 
-3. Run the payload
-	``` bash
-	go run payload.go
+4. Run the Beacon on the target machine:
+	```bash
+	./beacon &
 	```
 
-The payload will connect to the server (`default: 127.0.0.1:8080`), send commands, and display the responses with a 2-second delay between each command.
+### Interacting with Agents
 
-The server listens on :8080. Modify the port in `server.go` if needed:
-``` bash
-ln, err := net.Listen("tcp", ":8080")
-```
-The payload connects to `127.0.0.1:8080`. You can update the IP/Port in `payload.go` as well:
-``` bash
-conn, err := net.Dial("tcp", "127.0.0.1:8080")
-```
-Edit the `commands` slice in `payload.go` to customaise the commands sent:
-``` bash
-commands := []string{
-    "whoami",
-    "ip addr",
-    "pwd",
-    "ls",
-}
+Once the beacon is running, it will check-in with the Team Server.
+
+```text
+[*] Starting HTTP Team Server on port :8080
+c2> 
+[+] New Agent Registered: e51ec4c6-a873 (ubuntu-target) from 127.0.0.1
 ```
 
-The Server Output must be something like that:
-``` bash
-$ go run server.go
-C2 server started on port 8080
-Listening on [::]:8080
-New connection from 127.0.0.1:54321
-Received command: /usr/bin/whoami
-Response sent: user
-Received command: /sbin/ip addr
-Response sent: 1: lo: <LOOPBACK,UP,LOWER_UP> mtu 65536 qdisc noqueue state UNKNOWN group default qlen 1000
-    link/loopback 00:00:00:00:00:00 brd 00:00:00:00:00:00
-    inet 127.0.0.1/8 scope host lo
-       valid_lft forever preferred_lft forever
-    inet6 ::1/128 scope host 
-       valid_lft forever preferred_lft forever
-[... truncated ...]
+Use the `agents` command to verify their status, and `interact <ID>` to issue bash commands:
+
+```text
+c2> agents
+--- Active Agents ---
+[ALIVE] ID: e51ec4c6-a873 | Host: ubuntu-target | IP: 127.0.0.1 | Last Seen: 2s
+
+c2> interact e51ec4c6-a873
+e51ec4c6 c2> id
+Task 482910 queued for e51ec4c6-a873
+
+[*] Result from e51ec4c6-a873 (Task 482910):
+uid=1000(user) gid=1000(user) groups=1000(user),27(sudo)
 ```
+
+Type `back` to return to the main menu, or `exit` to shut down the Team Server.
 
 ---
-## Limitations
 
-While functional for educational purposes, this C2 server and payload system has several notable limitations:
+## Limitations and Future Improvements
 
-1. **Static Command List in Earlier Versions**  
-   The payload contained a static list (`commands := []string{...}`) that was executed sequentially, limiting flexibility. While this has been improved to allow remote command execution, older versions lacked the ability to dynamically receive commands from the server.
+While functional for educational purposes, this project has several notable limitations for real-world scenarios:
 
-2. **Platform Dependency**  
-   The current implementation is tailored for Linux, using `/bin/sh` for command execution. It does not natively support other operating systems like Windows or macOS without manual adjustments to the command execution logic.
-
-3. **Lack of Encryption**  
-   Communication between the server and payload is unencrypted, making it vulnerable to interception or tampering over unsecured networks. Sensitive data or commands could be exposed to attackers without additional security measures like TLS.
-
-4. **Single-Threaded Command Handling**  
-   The server processes commands from a single client sequentially in each connection. It cannot handle multiple payloads concurrently without significant delays, limiting scalability for scenarios involving multiple compromised machines.
-
-## Future improvements
-
-1. **Remote Command Execution**  
-   Modify the payload to act as a persistent client that connects to the C2 server and waits for commands sent remotely. The payload would execute these commands on the compromised machine and return the results to the server.
-
-2. **Cross-Platform Support**  
-   Enhance the payload and server to detect the operating system (e.g., using `runtime.GOOS`) and adapt command execution accordingly (e.g., `/bin/sh` for Linux, `cmd.exe` for Windows). This would make the tool versatile across different environments.
-
-3. **Encryption with TLS**  
-   Implement Transport Layer Security (TLS) to encrypt communication between the server and payload. This would prevent eavesdropping and ensure that commands and responses remain confidential, making the system more secure for real-world testing scenarios.
+1. **Platform Dependency**  
+   The current payload is rigidly tailored for Linux. Both the command execution (`/bin/bash`) and the process spoofing technique (`SYS_PRCTL`) will fail to compile or execute on Windows or macOS.
+2. **Lack of In-Transit Encryption**  
+   Communication between the server and payload occurs over plaintext HTTP. While the JSON bodies could be encrypted with AES, implementing full HTTPS via TLS is highly recommended to prevent Deep Packet Inspection (DPI).
+3. **No Persistence**
+   The beacon only runs in memory while the system is powered on. It does not contain capabilities to survive server reboots (e.g., adding itself to crontab or systemd services).
 
 ---
 ### License
