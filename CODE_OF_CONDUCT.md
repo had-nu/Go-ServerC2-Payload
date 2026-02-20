@@ -39,4 +39,4 @@ If you encounter or suspect misuse of this tool—such as unauthorised access, m
 
 Let’s build a community that champions ethical cybersecurity research, supports learning, and drives responsible innovation. Use this C2 tool to grow your skills and knowledge—but always with integrity, transparency, and respect for legal and ethical boundaries. Together, we can ensure this project remains a force for good in the security community.
 
-*Last updated: March 2025*
+*Last updated: February 2026*

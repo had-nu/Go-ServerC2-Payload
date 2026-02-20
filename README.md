@@ -3,7 +3,7 @@
 [![Go](https://img.shields.io/badge/Go-1.24+-00ADD8.svg?style=flat-square&logo=go)](https://golang.org/)
 [![License](https://img.shields.io/badge/License-Apache%202.0-blue.svg?style=flat-square)](https://opensource.org/licenses/Apache-2.0)
 
-A Command and Control (C2) suite written in Go. This project implements a modern HTTP Beacon architecture designed for educational purposes and to demonstrate Linux-specific evasion techniques. It consists of a central **Team Server** and an HTTP polling **Beacon** payload.
+A Command and Control (C2) suite written in Go. This project implements a modern HTTP Beacon architecture designed for educational purposes and to demonstrate Linux-specific evasion techniques. It consists of a central *Team Server* and an HTTP polling *Beacon* payload.
 
 ## Description
 
@@ -21,7 +21,7 @@ This repository contains two main components:
 
 ## Ethical Hacking Disclaimer
 
-This project is intended **solely for educational purposes and ethical security research**. It demonstrates C2 functionality and Linux evasion mechanisms. It should only be used in controlled environments where you have explicit permission to test (e.g., your own systems or networks). Unauthorized use of this code to harm systems, networks, or individuals is strictly prohibited and illegal. 
+This project is intended *solely for educational purposes and ethical security research*. It demonstrates C2 functionality and Linux evasion mechanisms. It should only be used in controlled environments where you have explicit permission to test, or on your own systems or networks. Unauthorized use of this code to harm systems, networks, or individuals is strictly prohibited and illegal. 
 
 See the Code of Conduct file.
 
