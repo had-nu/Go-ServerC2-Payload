@@ -24,7 +24,5 @@ go.work.sum
 # env file
 .env
 
-server
-beacon
+bin/
 payload.go
-server.go
