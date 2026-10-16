@@ -1,6 +1,14 @@
 BIN      := bin
 STATE    := $(CURDIR)/.state
 PKGS     := ./...
+LABPKGS  := ./lab/...
+# The lab directory is not in the public repository. The targets that use it
+# must not break when it is absent.
+ifeq ($(wildcard lab/beacon-impl),)
+HAVE_LAB := 0
+else
+HAVE_LAB := 1
+endif
 GO       ?= go
 
 .PHONY: help
@@ -15,11 +23,16 @@ build: ## build the published programs
 	@echo "built: $(BIN)/team-server $(BIN)/beacon-stub"
 
 .PHONY: lab-beacon
-lab-beacon: ## build the working Beacon (not published)
+lab-beacon: ## build the working Beacon
+ifeq ($(HAVE_LAB),0)
+	@echo "lab/beacon-impl is not present."
+	@echo "Run 'make lab-bootstrap' to create it, then run this target again."
+	@exit 1
+endif
 	$(GO) build -ldflags="-s -w" -o $(BIN)/beacon ./lab/beacon-impl
 
 .PHONY: strip-beacon
-strip-beacon: lab-beacon ## report the stripped size of the working Beacon
+strip-beacon: lab-beacon ## report the size of the working Beacon
 	@ls -lh $(BIN)/beacon
 
 .PHONY: test
@@ -37,7 +50,10 @@ ste: ## check the documents against the mechanical rules of ASD-STE100 Issue 9
 
 .PHONY: vet
 vet: ## run go vet
-	$(GO) vet $(PKGS) ./lab/...
+	$(GO) vet $(PKGS)
+ifneq ($(HAVE_LAB),0)
+	$(GO) vet $(LABPKGS)
+endif
 
 .PHONY: fmt
 fmt: ## format the code

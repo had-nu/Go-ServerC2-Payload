@@ -64,10 +64,14 @@ make run-server
 ```
 
 The command listens on `127.0.0.1:8443`. It uses TLS. On the first start it
-writes two files in the `state` directory:
+writes two files in the `.state` directory:
 
-- `state/c2.key` — the shared secret
-- `state/team-server.crt` — the self-signed certificate
+- `.state/c2.key` — the shared secret, mode `0600`
+- `.state/team-server.crt` — the certificate, mode `0600`
+
+The program `cmd/team-server` uses `~/.local/share/go-serverc2-payload` for the
+state directory when it runs without `make`. The `make` target uses `.state`
+in the working directory.
 
 Read the secret with:
 

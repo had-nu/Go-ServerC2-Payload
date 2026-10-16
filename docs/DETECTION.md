@@ -8,47 +8,64 @@ certify the text against the standard.
 
 ## Host indicators
 
+This section states the values that the author measured on a Linux host. Each
+statement names the file that gives the value.
+
+### What the mask changes, and what it does not
+
+The Beacon writes the string `[kworker/u4:2]` to the `comm` field with the
+system call `prctl`. The kernel stores the value in the `comm` field only.
+
+The author measured the result. The table shows the value of each file.
+
+| Source | Value after the mask | Hides the process? |
+|---|---|---|
+| `/proc/<pid>/comm` | `[kworker/u4:2]` | Yes |
+| `ps -o comm=` | `[kworker/u4:2]` | Yes |
+| `/proc/<pid>/cmdline` | the real command line | **No** |
+| `ps -o args=` | the real command line | **No** |
+| `/proc/<pid>/exe` | the real path to the binary | **No** |
+
+A rule must read a field that the mask does not change. The fields `cmdline`
+and `exe` keep the truth.
+
 ### The process name
 
-The Beacon writes the string `[kworker/u4:2]` to the `comm` field.
-
-Real kernel worker threads have different names. A typical kworker name has
-this form:
+Real kernel worker threads have different names. The author measured these
+names on a Linux host:
 
 ```text
-kworker/0:1-events
-kworker/u16:2
+kworker/R-rcu_gp
+kworker/0:0H-kblockd
+kworker/4:1-i915-unordered
+pool_workqueue_release
 ```
 
-The mask in this project ends with a colon and a digit, and it has no process
-number before the colon. A rule can search for a `comm` value that begins with
-`[kworker` and ends with `]`.
+A kernel thread name has no opening bracket. A masked userspace process usually
+has one.
 
-A strong rule must also check the other fields. See "Why the name alone is weak".
+A weak rule searches for a `comm` value that begins with `[` and ends with `]`.
+Many programs write a bracketed name. Do not build a rule on the bracket alone.
 
-A weak signal is a name that begins with `[`. Many programs write a bracketed
-name. Do not build a rule on the bracket alone.
+### The executable file
 
-### The executable
+The author measured this value on a Linux host.
 
-The Beacon is a single static binary. It has no interpreter in the process
-tree. A shell calls it, so the parent process is often a shell that has already
-exited.
+| Process | `/proc/<pid>/exe` |
+|---|---|
+| A shell | A readable link to `/usr/bin/bash` |
+| A kernel worker thread | No entry |
+| `kthreadd`, which is process 2 | A link that a normal user cannot read |
 
-EXAMINE these fields together:
+A kernel worker thread has no entry at the path `/proc/<pid>/exe`. The
+exception is process 2. A rule must not treat process 2 as a userspace process.
 
-- the `comm` value
-- the name of the executable in `/proc/<pid>/exe`
-- the name of the executable in `/proc/<pid>/cmdline`
-- the first start of the process in `/proc/<pid>/stat`
-
-A real kernel thread has no executable file. The path `/proc/<pid>/exe` does not
-exist for a real kernel thread. This is a strong check.
+This check is strong. Combine it with the `comm` value.
 
 ### The parent process
 
-Real kernel threads have a parent of `2`, which is the `kthreadd` process. A
-userspace process cannot have a parent of `2`.
+Real kernel threads have a parent process ID of `2`. The author measured this
+value. A userspace process cannot have a parent of `2`.
 
 This is the strongest single check for this technique:
 
@@ -60,8 +77,30 @@ That combination does not happen. Write the rule with this logic.
 
 ### The parent of the parent
 
-A real kernel thread has an ancestry of `kthreadd` and then `swapper/0` with a
-process ID of `0`. EXAMINE the second parent for that value.
+The author measured the ancestry of a kernel worker thread:
+
+```text
+pid 90167  ppid 2      comm kworker/4:1-i915-unordered
+pid 2      ppid 0      comm kthreadd
+```
+
+The chain ends at process ID `0`. The `proc` file system has **no** entry for
+process ID `0`. A rule cannot read `/proc/0/stat`, and it cannot read the name
+`swapper/0` from `proc`.
+
+A rule must stop the walk at process ID `0` and test for that value. It must
+not try to read a name at process ID `0`.
+
+### The field order in `/proc/<pid>/stat`
+
+The second field of `/proc/<pid>/stat` is the `comm` value **in parentheses**.
+The fourth field is the parent process ID.
+
+A shell that reads these fields with `awk '{print $4}'` gives a wrong answer
+when the `comm` value contains a space. The shell splits the line on the space
+before it reads the field. The mask `[kworker/u4:2]` has no space, so the simple
+command gives the right answer for this technique. A rule for other names needs
+a parser. The parser reads the last `)` before it reads the fields that follow.
 
 ## Network indicators
 
