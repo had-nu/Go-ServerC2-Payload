@@ -16,8 +16,8 @@ The repository contains two programs.
 The repository publishes one Beacon file. That file has the shape of a Beacon.
 It does not run any command. See `cmd/beacon/main.go`.
 
-The working Beacon is in `lab/beacon-impl`. The `.gitignore` file excludes the
-`lab` directory. A lab operator builds it with `make lab-beacon`.
+The working Beacon is in `lab/beacon-impl`. A lab operator builds it with
+`make lab-beacon`.
 
 ## The packages
 
@@ -29,7 +29,7 @@ The working Beacon is in `lab/beacon-impl`. The `.gitignore` file excludes the
 | `internal/opslinux` | The Linux `prctl` call. It changes the process name. |
 | `cmd/team-server` | The operator program. |
 | `cmd/beacon` | The published Beacon interface. |
-| `lab/beacon-impl` | The working Beacon. It is not published. |
+| `lab/beacon-impl` | The working Beacon. It runs the commands. |
 
 ## The sequence of one check-in
 

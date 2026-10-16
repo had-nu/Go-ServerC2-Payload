@@ -6,15 +6,22 @@ of ASD-STE100 shortens the sentences. It does not shorten the risk.
 
 ## What this repository publishes
 
-The repository publishes two programs.
+The repository publishes three programs.
 
 - The Team Server. It needs a terminal and an operator. It runs on the
   administrator machine.
+- The Lab Beacon. It runs the commands. It needs the shared secret.
 - The Interface Beacon. It runs no command. It prints text and stops.
 
-The repository does not publish a working Beacon. The `.gitignore` file
-excludes the `lab` directory. The working Beacon is not in the history of the
-public repository either. See "The previous version" below.
+Only the Lab Beacon executes remote input. It has two controls:
+
+1. The Team Server requires the shared secret. A Beacon without the secret
+   receives the status `401` at every request.
+2. The Lab Beacon has no persistence, no injection, and no self-deletion.
+
+The controls reduce the effect of a misuse. They do not remove it. A person
+with the secret and a Team Server can use the Lab Beacon on any host that the
+person can reach. The risk is in T6.
 
 ## The trust boundary
 
@@ -136,6 +143,17 @@ the `.gitignore` file. The repository published the stub file only. The stub
 file has empty function bodies. The stub program stops with the status `0`.
 
 That version was safe by accident. It was not a design. A reader of the
-repository cannot run a Beacon. This version keeps that property on purpose.
-The published Interface Beacon still runs nothing. The difference is that the
-repository now compiles, has tests, and states the design in writing.
+repository was not able to run a Beacon.
+
+This version adds the Lab Beacon to the repository. That was a decision, not an
+accident. The case study needs a reader to be able to build the artifact and
+see the behaviour. The decision has these costs:
+
+- The repository holds a program that runs remote commands.
+- A clone gives the artifact without a build step that a reader must invent.
+- The ethical framing, the threat model, and the detection notes must stay with
+  the code. A reader who takes only the `lab` directory loses them.
+
+A reviewer who rejects this decision must remove the `lab` directory and the
+references to it in one commit. The Interface Beacon keeps the documented
+interface.

@@ -2,13 +2,8 @@ BIN      := bin
 STATE    := $(CURDIR)/.state
 PKGS     := ./...
 LABPKGS  := ./lab/...
-# The lab directory is not in the public repository. The targets that use it
-# must not break when it is absent.
-ifeq ($(wildcard lab/beacon-impl),)
-HAVE_LAB := 0
-else
-HAVE_LAB := 1
-endif
+DEMO_DIR := .demo
+DEMO_PORT ?= 18443
 GO       ?= go
 
 .PHONY: help
@@ -23,12 +18,7 @@ build: ## build the published programs
 	@echo "built: $(BIN)/team-server $(BIN)/beacon-stub"
 
 .PHONY: lab-beacon
-lab-beacon: ## build the working Beacon
-ifeq ($(HAVE_LAB),0)
-	@echo "lab/beacon-impl is not present."
-	@echo "Run 'make lab-bootstrap' to create it, then run this target again."
-	@exit 1
-endif
+lab-beacon: ## build the Lab Beacon, the program that runs commands
 	$(GO) build -ldflags="-s -w" -o $(BIN)/beacon ./lab/beacon-impl
 
 .PHONY: strip-beacon
@@ -50,10 +40,7 @@ ste: ## check the documents against the mechanical rules of ASD-STE100 Issue 9
 
 .PHONY: vet
 vet: ## run go vet
-	$(GO) vet $(PKGS)
-ifneq ($(HAVE_LAB),0)
-	$(GO) vet $(LABPKGS)
-endif
+	$(GO) vet $(PKGS) $(LABPKGS)
 
 .PHONY: fmt
 fmt: ## format the code
@@ -94,5 +81,10 @@ show-secret: ## print the shared secret that the beacon needs
 	@cat $(STATE)/c2.key
 
 .PHONY: clean
+demo: build lab-beacon ## run the Team Server and the Lab Beacon, then exit
+	@rm -rf $(DEMO_DIR) && mkdir -p $(DEMO_DIR)
+	@printf 'id\n' > $(DEMO_DIR)/cmds.txt
+	@./scripts/demo.sh $(DEMO_DIR) $(DEMO_PORT)
+
 clean: ## remove build output
-	rm -rf $(BIN) coverage.out
+	rm -rf $(BIN) $(DEMO_DIR) coverage.out

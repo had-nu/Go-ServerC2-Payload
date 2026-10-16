@@ -48,14 +48,19 @@ someone will misuse it, report it. See "Reporting a problem" below.
 
 This matters for the people who clone the project.
 
-The repository publishes a **Team Server** and an **Interface Beacon**. The
-Interface Beacon prints text and stops. It runs no command.
+The repository publishes three programs.
 
-The working Beacon is in the `lab` directory. The `.gitignore` file excludes
-that directory. The working Beacon is not in the public repository.
+- The **Team Server** accepts check-ins. An operator sends the commands.
+- The **Lab Beacon** runs the commands. It needs the shared secret to connect.
+- The **Interface Beacon** prints text and stops. It runs no command.
 
-Keep it that way. Do not commit the `lab` directory. Do not remove `lab/` from
-the `.gitignore` file in a pull request.
+The Lab Beacon is the part that a misuse affects. It needs two things before it
+runs anything: a Team Server that an operator started, and the shared secret
+from the state directory. A contributor must not remove either check.
+
+Do not add features that give the Lab Beacon persistence, injection, or
+stealth beyond the process name. A pull request that adds one of those needs a
+reason in the description.
 
 ## Reporting a problem
 

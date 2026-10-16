@@ -9,9 +9,8 @@ bin/
 *.test
 *.out
 
-# The working Beacon. The published repository has the interface stub in
-# cmd/beacon. A lab operator builds the working Beacon from lab/.
-lab/
+# The demo target writes here.
+.demo/
 
 # Local state: the shared secret and the TLS certificate
 *.key

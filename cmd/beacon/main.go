@@ -7,8 +7,9 @@
 //
 // The functions return zero values. Every body is empty on purpose.
 //
-// The working Beacon lives in lab/beacon-impl, which the .gitignore file
-// excludes. A lab operator builds it with "make lab-beacon".
+// The working Beacon is in lab/beacon-impl. A lab operator builds it with
+// "make lab-beacon". This program stays in the repository as the documented
+// interface, so that a reader can see the shape without running anything.
 package main
 
 import (

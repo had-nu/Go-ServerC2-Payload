@@ -19,10 +19,11 @@ architecture works, and how it looks from the defender side.
 | Program | Path | Runs commands? |
 |---|---|---|
 | Team Server | `cmd/team-server` | It queues commands. An operator sends them. |
+| Lab Beacon | `lab/beacon-impl` | Yes. It runs what the operator sends. |
 | Interface Beacon | `cmd/beacon` | No. It prints text and stops. |
 
-The working Beacon is in `lab/beacon-impl`. The `.gitignore` file excludes the
-`lab` directory, so the working Beacon is **not** in the public repository. See
+The working Beacon is in `lab/beacon-impl`. It is in this repository. It needs
+a Team Server and the shared secret before it does anything. See
 [docs/THREAT_MODEL.md](docs/THREAT_MODEL.md).
 
 ## The documentation
@@ -46,16 +47,31 @@ shortens the sentences. It is **not** a certification against the standard. Read
 - Go 1.24 or later. Run `go version` to check.
 - Linux. The Beacon calls a Linux system call.
 
+## Quick start
+
+Run the whole cycle in one command:
+
+```bash
+make demo
+```
+
+The target does the following:
+
+1. builds the Team Server and the Lab Beacon,
+2. starts the Team Server on `127.0.0.1:18443` with TLS,
+3. starts the Lab Beacon,
+4. waits for the check-in,
+5. sends the command `id`,
+6. prints the output, then stops both programs.
+
+The state of the demo is in `.demo`. Run `make clean` to remove it.
+
 ## Build
 
 ```bash
-make build
+make build          # bin/team-server and bin/beacon-stub
+make lab-beacon     # bin/beacon, the program that runs commands
 ```
-
-The command writes two files:
-
-- `bin/team-server`
-- `bin/beacon-stub`
 
 ## Run the Team Server
 
@@ -106,19 +122,18 @@ task 1792179166429158512 queued for e51ec4c6
 uid=1000(operator) gid=1000(operator)
 ```
 
-## Build the working Beacon
+## Run the Lab Beacon by hand
 
-**CAUTION:** THE WORKING BEACON RUNS REMOTE COMMANDS. BUILD IT ONLY FOR A LAB
-THAT YOU CONTROL.
+**CAUTION:** THE LAB BEACON RUNS REMOTE COMMANDS. RUN IT ONLY AGAINST A TEAM
+SERVER THAT YOU STARTED, IN A LAB THAT YOU CONTROL.
+
+Start the Team Server in one terminal:
 
 ```bash
-make lab-beacon
+make run-server
 ```
 
-The command writes `bin/beacon`. The file has no symbol table. The build uses
-the flag `-ldflags="-s -w"`.
-
-Run it against a Team Server on the same machine:
+Run the Lab Beacon in a second terminal:
 
 ```bash
 ./bin/beacon \
@@ -128,6 +143,8 @@ Run it against a Team Server on the same machine:
   -sleep 10s \
   -jitter 20
 ```
+
+The build uses the flag `-ldflags="-s -w"`, so the file has no symbol table.
 
 The flag `-ca` makes the Beacon check the Team Server certificate. Without this
 flag the Beacon accepts any certificate. That is acceptable in a closed lab
@@ -192,6 +209,24 @@ directive to that line:
 | `CHECK (n)` with `do a check of` | `CHECK (v)` <!-- stelint:allow 1.2 --> |
 ```
 
+## The commands
+
+| Command | Effect |
+|---|---|
+| `make help` | List the targets |
+| `make demo` | Run the whole cycle and exit |
+| `make build` | Build the Team Server and the interface Beacon |
+| `make lab-beacon` | Build the Lab Beacon |
+| `make run-server` | Start the Team Server on `127.0.0.1:8443` |
+| `make show-secret` | Print the shared secret |
+| `make check` | Run the format check, vet, tests, and the style check |
+| `make ste` | Run only the style check |
+| `make test` | Run the tests with the race detector |
+| `make cover` | Report the coverage |
+| `make lint` | Run staticcheck and gosec |
+| `make vuln` | EXAMINE the dependencies for known vulnerabilities |
+| `make clean` | Remove `bin`, `.demo`, and `coverage.out` |
+
 ## The changes in this version
 
 The previous version did not compile. It had 8 redeclaration errors. Its
@@ -200,6 +235,7 @@ README described paths that did not exist.
 This version changes the following:
 
 - The repository compiles. It uses `cmd/` and `internal/` packages.
+- The Lab Beacon is in the repository. A reader can build it.
 - Both handlers check a shared secret.
 - The Team Server uses TLS by default.
 - The Team Server sets the HTTP limits and a graceful shutdown.

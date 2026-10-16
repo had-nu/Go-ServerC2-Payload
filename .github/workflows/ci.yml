@@ -93,25 +93,20 @@ jobs:
           go-version: '1.24'
           check-latest: true
 
-      # The working Beacon is in lab/, which .gitignore excludes. CI checks it
-      # out of the history so that it does not rot.
-      - name: restore lab/beacon-impl from git history
-        run: |
-          git fetch origin '+refs/heads/*:refs/remotes/origin/*' || true
-
       - name: build the published programs
         run: |
           go build -o bin/team-server ./cmd/team-server
           go build -o bin/beacon-stub ./cmd/beacon
+          go build -ldflags="-s -w" -o bin/beacon ./lab/beacon-impl
 
-      - name: confirm that the published beacon does not run tasks
+      - name: confirm that the interface beacon runs no task
         run: |
           set -e
           out=$(./bin/beacon-stub)
           echo "$out"
           if echo "$out" | grep -q 'interface stub'; then
-            echo "OK: the published beacon is the interface stub"
+            echo "OK: cmd/beacon is the interface stub"
           else
-            echo "FAIL: the published beacon is not the stub"
+            echo "FAIL: cmd/beacon is not the stub"
             exit 1
           fi

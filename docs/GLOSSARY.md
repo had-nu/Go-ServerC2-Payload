@@ -20,8 +20,8 @@ of the project called this program the "server". Do not use "server" alone.
 Server, runs commands, and returns output. Do not use "payload", "implant", or
 "client" for this program. Those terms mean something else in security writing.
 
-**Lab Beacon** (noun) — The working Beacon in `lab/beacon-impl`. It is not
-published.
+**Lab Beacon** (noun) — The working Beacon in `lab/beacon-impl`. It runs the
+commands that the operator sends.
 
 **Interface Beacon** (noun) — The Beacon file in `cmd/beacon`. It has the shape
 of a Beacon and runs nothing.
