@@ -82,14 +82,18 @@ The rules that catch the most errors in practice:
 | Use | Do not use |
 |---|---|
 | `APPROXIMATELY (adv)` | `ABOUT (prep)` for a value that is not exact |
-| `CHECK (n)` with `do a check of` | `CHECK (v)` |
-| `TEST (n)` with `DO THE TEST` | `TEST (v)` |
-| `CAN` | `MAY`, `MIGHT`, `COULD` |
-| `MUST` | `SHALL`, `SHOULD` |
+| `CHECK (n)` with `do a check of` | `CHECK (v)` <!-- stelint:allow 1.2 --> |
+| `TEST (n)` with `DO THE TEST` | `TEST (v)` <!-- stelint:allow 1.2 --> |
+| `CAN` | `MAY`, `MIGHT`, `COULD` <!-- stelint:allow 1.1 --> |
+| `MUST` | `SHALL`, `SHOULD` <!-- stelint:allow 1.1 --> |
 | `MAKE SURE` | `ENSURE` |
 | `START` | `INITIATE`, `COMMENCE`, `BEGIN` |
 | `OBEY` | `FOLLOW` for obedience |
 | `AT THIS TIME` | `NOW` for the present moment |
+
+The right column names forms that the dictionary does not approve. A
+`stelint:allow` directive tells the checker that the writer knows this. Remove a
+directive and the checker reports the line again.
 
 `CHECK`, `TEST`, and `VERIFY` are **not** approved verbs. The list of 208
 approved verbs has no entry for any of them.

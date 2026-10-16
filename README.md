@@ -139,8 +139,8 @@ random change, in percent. With the values above the interval is between 8 and
 make check
 ```
 
-The command runs the format check, `go vet`, and the tests with the race
-detector.
+The command runs the format check, `go vet`, the tests with the race detector,
+and the writing-style check.
 
 The coverage of the packages:
 
@@ -150,6 +150,43 @@ The coverage of the packages:
 | `internal/agentstore` | 91% |
 | `internal/transport` | 82% |
 | `internal/opslinux` | 83% |
+
+## Check the writing style
+
+The repository uses the writing style of ASD-STE100 Issue 9. The tool
+`tools/stelint` checks the rules that a program can decide.
+
+```bash
+make ste
+```
+
+The tool checks these rules:
+
+| Rule | Check |
+|---|---|
+| 2.1 | A multi-word noun has 3 words at most. |
+| 4.2 | The text has no contraction. |
+| 5.1 | An instruction has 20 words at most. |
+| 6.3 | A sentence has 25 words at most. |
+| 6.6 | A paragraph has 6 sentences at most. |
+| 8.1 | The text has no semicolon. |
+| 1.1 | The text has no modal that the dictionary does not approve. |
+| 1.2 | The text does not use `CHECK` or `TEST` as a verb. |
+| 1.3 | The text does not use `ABOUT` for a value that is not exact. |
+
+The tool cannot check the approved meaning of a noun, or the approved part of
+speech of a technical noun. A writer checks those by hand.
+
+The tool does not certify a document against the standard. A writer claims only
+that the document follows the writing style. See
+[docs/WRITING-STYLE.md](docs/WRITING-STYLE.md).
+
+When a document names a form that the dictionary does not approve, add a
+directive to that line:
+
+```markdown
+| `CHECK (n)` with `do a check of` | `CHECK (v)` <!-- stelint:allow 1.2 --> |
+```
 
 ## The changes in this version
 

@@ -31,6 +31,10 @@ cover: ## run the tests and report coverage
 	$(GO) test -race -count=1 -coverprofile=coverage.out $(PKGS)
 	$(GO) tool cover -func=coverage.out | tail -1
 
+.PHONY: ste
+ste: ## check the documents against the mechanical rules of ASD-STE100 Issue 9
+	$(GO) run ./tools/stelint README.md docs/*.md CODE_OF_CONDUCT.md
+
 .PHONY: vet
 vet: ## run go vet
 	$(GO) vet $(PKGS) ./lab/...
@@ -63,7 +67,7 @@ tidy: ## tidy the module files
 	$(GO) mod tidy
 
 .PHONY: check
-check: fmt-check vet test ## run every check that CI runs
+check: fmt-check vet test ste ## run every check that CI runs
 
 .PHONY: run-server
 run-server: build ## run the Team Server on 127.0.0.1:8443

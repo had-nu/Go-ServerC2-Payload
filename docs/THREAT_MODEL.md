@@ -63,7 +63,7 @@ the flag `-ca`. The documentation states this.
 
 **Before the fix.** The console used the expression `ID[:8]`. A Beacon sent the
 header `X-Agent-ID: ab`. The operator typed the command `interact ab`. The
-server stopped with a panic. Any host on the network could trigger this. The
+server stopped with a panic. Any host on the network can trigger this. The
 server had no authentication, so the trigger was simple.
 
 **Now.** The Team Server checks the agent ID before it stores the ID. The check
@@ -136,6 +136,6 @@ the `.gitignore` file. The repository published the stub file only. The stub
 file has empty function bodies. The stub program stops with the status `0`.
 
 That version was safe by accident. It was not a design. A reader of the
-repository could not run a Beacon. This version keeps that property on purpose.
+repository cannot run a Beacon. This version keeps that property on purpose.
 The published Interface Beacon still runs nothing. The difference is that the
 repository now compiles, has tests, and states the design in writing.

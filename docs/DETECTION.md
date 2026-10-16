@@ -35,7 +35,7 @@ The Beacon is a single static binary. It has no interpreter in the process
 tree. A shell calls it, so the parent process is often a shell that has already
 exited.
 
-Check these fields together:
+EXAMINE these fields together:
 
 - the `comm` value
 - the name of the executable in `/proc/<pid>/exe`
@@ -61,7 +61,7 @@ That combination does not happen. Write the rule with this logic.
 ### The parent of the parent
 
 A real kernel thread has an ancestry of `kthreadd` and then `swapper/0` with a
-process ID of `0`. Check the second parent for that value.
+process ID of `0`. EXAMINE the second parent for that value.
 
 ## Network indicators
 

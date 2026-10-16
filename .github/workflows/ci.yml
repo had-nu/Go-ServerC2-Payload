@@ -47,6 +47,9 @@ jobs:
       - name: test with the race detector
         run: go test -race -count=1 ./...
 
+      - name: check the documents against the ASD-STE100 rules
+        run: go run ./tools/stelint README.md docs/*.md CODE_OF_CONDUCT.md
+
       - name: report the coverage
         run: |
           go test -coverprofile=coverage.out ./internal/... > /dev/null
