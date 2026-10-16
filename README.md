@@ -1,104 +1,181 @@
-# Go Command and Control (C2) Server and Payload
+# Go-ServerC2-Payload
 
-[![Go](https://img.shields.io/badge/Go-1.24+-00ADD8.svg?style=flat-square&logo=go)](https://golang.org/)
-[![License](https://img.shields.io/badge/License-Apache%202.0-blue.svg?style=flat-square)](https://opensource.org/licenses/Apache-2.0)
+[![Go](https://img.shields.io/badge/Go-1.24%2B-00ADD8.svg?style=flat-square&logo=go)](https://go.dev/)
+[![License](https://img.shields.io/badge/License-Apache%202.0-blue.svg?style=flat-square)](LICENSE)
 
-A Command and Control (C2) suite written in Go. This project implements a modern HTTP Beacon architecture designed for educational purposes and to demonstrate Linux-specific evasion techniques. It consists of a central *Team Server* and an HTTP polling *Beacon* payload.
+A C2 teaching kit written in Go. The kit has two programs. The **Team Server**
+accepts check-ins and gives an operator a console. The **Beacon** calls the
+Team Server, runs commands, and returns the output.
 
-## Description
+This repository is a case study. It explains how a command and control
+architecture works, and how it looks from the defender side.
 
-This repository contains two main components:
-- **`main/server/server.go` (Team Server)**: An HTTP REST server that acts as the central hub. It listens on port `:8080` for Beacon check-ins, tracks active agents, and provides an interactive `readline`-based CLI for the operator to issue commands.
-- **`main/beacon/payload.go` (Beacon)**: A stealthy Linux client that connects to the Team Server. It periodically polls the server for tasks using an unpredictable Sleep and Jitter cycle, executes commands via `/bin/bash`, and returns the output to the server.
+> **WARNING:** THIS SOFTWARE EXECUTES COMMANDS THAT A REMOTE CLIENT SENDS. RUN
+> IT ONLY IN A CLOSED LAB THAT YOU CONTROL. USE ON A SYSTEM THAT YOU DO NOT OWN
+> IS ILLEGAL IN MOST COUNTRIES.
 
-### Key Features
-* **HTTP Beaconing:** Communication operates over standard HTTP `GET`/`POST` requests, mimicking normal web traffic rather than dropping raw TCP sockets.
-* **Sleep & Jitter:** The beacon does not use static sleep intervals. It calculates a dynamic sleep duration (Base 10s + 20% Jitter) for each check-in, breaking network pattern recognition signatures.
-* **Process Spoofing (`prctl`):** Upon execution, the payload aggressively alters its own process name to `[kworker/u4:2]`, allowing it to blend into Linux process lists alongside legitimate kernel worker threads.
-* **Operator Console:** The Team Server features an interactive shell to view alive/dead agents and directly drop into sessions to queue tasks.
+## What this repository publishes
 
----
+| Program | Path | Runs commands? |
+|---|---|---|
+| Team Server | `cmd/team-server` | It queues commands. An operator sends them. |
+| Interface Beacon | `cmd/beacon` | No. It prints text and stops. |
 
-## Ethical Hacking Disclaimer
+The working Beacon is in `lab/beacon-impl`. The `.gitignore` file excludes the
+`lab` directory, so the working Beacon is **not** in the public repository. See
+[docs/THREAT_MODEL.md](docs/THREAT_MODEL.md).
 
-This project is intended *solely for educational purposes and ethical security research*. It demonstrates C2 functionality and Linux evasion mechanisms. It should only be used in controlled environments where you have explicit permission to test, or on your own systems or networks. Unauthorized use of this code to harm systems, networks, or individuals is strictly prohibited and illegal. 
+## The documentation
 
-See the Code of Conduct file.
+| Document | Purpose |
+|---|---|
+| [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md) | How the two programs exchange data |
+| [docs/DETECTION.md](docs/DETECTION.md) | How to detect the technique |
+| [docs/IOC.md](docs/IOC.md) | The values that a defender searches for |
+| [docs/GLOSSARY.md](docs/GLOSSARY.md) | One term for one concept |
+| [docs/THREAT_MODEL.md](docs/THREAT_MODEL.md) | What an attacker can do |
 
-**Use responsibly and ethically.**
+The documents use the writing style of [ASD-STE100][ste] Issue 9. The style
+shortens the sentences. It is **not** a certification against the standard. Read
+[docs/WRITING-STYLE.md](docs/WRITING-STYLE.md) before you add a document.
 
----
+[ste]: https://www.asd-ste100.org/
 
 ## Prerequisites
 
-- Go 1.24 or later installed (`go version` to check).
-- A Linux environment (tested on Ubuntu/Debian).
+- Go 1.24 or later. Run `go version` to check.
+- Linux. The Beacon calls a Linux system call.
 
-## Usage
+## Build
 
-1. Clone the repository:
-	```bash
-	git clone https://github.com/had-nu/Go-ServerC2-Payload.git
-	cd Go-ServerC2-Payload
-	```
-2. Start the Team Server:
-	```bash
-	go run main/server/server.go
-	```
-	*The server will start on port `8080` and provide a `c2>` prompt.*
-
-3. Compile the Beacon Payload:
-	To take full advantage of the evasion techniques, the payload should be built stripping all symbolic and DWARF debugging information.
-	```bash
-	go build -ldflags="-s -w" -o beacon main/beacon/payload.go
-	```
-
-4. Run the Beacon on the target machine:
-	```bash
-	./beacon &
-	```
-
-### Interacting with Agents
-
-Once the beacon is running, it will check-in with the Team Server.
-
-```text
-[*] Starting HTTP Team Server on port :8080
-c2> 
-[+] New Agent Registered: e51ec4c6-a873 (ubuntu-target) from 127.0.0.1
+```bash
+make build
 ```
 
-Use the `agents` command to verify their status, and `interact <ID>` to issue bash commands:
+The command writes two files:
+
+- `bin/team-server`
+- `bin/beacon-stub`
+
+## Run the Team Server
+
+```bash
+make run-server
+```
+
+The command listens on `127.0.0.1:8443`. It uses TLS. On the first start it
+writes two files in the `state` directory:
+
+- `state/c2.key` — the shared secret
+- `state/team-server.crt` — the self-signed certificate
+
+Read the secret with:
+
+```bash
+make show-secret
+```
+
+## Use the console
+
+The console gives these commands:
+
+```text
+c2> agents                 list the registered agents
+c2> interact <agent-id>    send the next line to one agent
+c2> back                   stop sending to the agent
+c2> exit                   stop the team server
+```
+
+An example session:
 
 ```text
 c2> agents
---- Active Agents ---
-[ALIVE] ID: e51ec4c6-a873 | Host: ubuntu-target | IP: 127.0.0.1 | Last Seen: 2s
+--- agents ---
+[ALIVE] id=e51ec4c6 host=ubuntu-target ip=192.0.2.10 last_seen=1s pending=0
 
-c2> interact e51ec4c6-a873
+c2> interact e51ec4c6
+sending to e51ec4c6
 e51ec4c6 c2> id
-Task 482910 queued for e51ec4c6-a873
+task 1792179166429158512 queued for e51ec4c6
 
-[*] Result from e51ec4c6-a873 (Task 482910):
-uid=1000(user) gid=1000(user) groups=1000(user),27(sudo)
+[*] result from e51ec4c6 (task 1792179166429158512):
+uid=1000(operator) gid=1000(operator)
 ```
 
-Type `back` to return to the main menu, or `exit` to shut down the Team Server.
+## Build the working Beacon
 
----
+**CAUTION:** THE WORKING BEACON RUNS REMOTE COMMANDS. BUILD IT ONLY FOR A LAB
+THAT YOU CONTROL.
 
-## Limitations and Future Improvements
+```bash
+make lab-beacon
+```
 
-While functional for educational purposes, this project has several notable limitations for real-world scenarios:
+The command writes `bin/beacon`. The file has no symbol table. The build uses
+the flag `-ldflags="-s -w"`.
 
-1. **Platform Dependency**  
-   The current payload is rigidly tailored for Linux. Both the command execution (`/bin/bash`) and the process spoofing technique (`SYS_PRCTL`) will fail to compile or execute on Windows or macOS.
-2. **Lack of In-Transit Encryption**  
-   Communication between the server and payload occurs over plaintext HTTP. While the JSON bodies could be encrypted with AES, implementing full HTTPS via TLS is highly recommended to prevent Deep Packet Inspection (DPI).
-3. **No Persistence**
-   The beacon only runs in memory while the system is powered on. It does not contain capabilities to survive server reboots (e.g., adding itself to crontab or systemd services).
+Run it against a Team Server on the same machine:
 
----
-### License
+```bash
+./bin/beacon \
+  -server https://127.0.0.1:8443 \
+  -secret-file .state/c2.key \
+  -ca .state/team-server.crt \
+  -sleep 10s \
+  -jitter 20
+```
 
-Licensed under the Apache License 2.0. See LICENSE for details.
+The flag `-ca` makes the Beacon check the Team Server certificate. Without this
+flag the Beacon accepts any certificate. That is acceptable in a closed lab
+network. It is not acceptable anywhere else.
+
+The flag `-sleep` sets the base interval. The flag `-jitter` sets the largest
+random change, in percent. With the values above the interval is between 8 and
+12 seconds.
+
+## Test
+
+```bash
+make check
+```
+
+The command runs the format check, `go vet`, and the tests with the race
+detector.
+
+The coverage of the packages:
+
+| Package | Coverage |
+|---|---|
+| `internal/c2proto` | 100% |
+| `internal/agentstore` | 91% |
+| `internal/transport` | 82% |
+| `internal/opslinux` | 83% |
+
+## The changes in this version
+
+The previous version did not compile. It had 8 redeclaration errors. Its
+README described paths that did not exist.
+
+This version changes the following:
+
+- The repository compiles. It uses `cmd/` and `internal/` packages.
+- Both handlers check a shared secret.
+- The Team Server uses TLS by default.
+- The Team Server sets the HTTP limits and a graceful shutdown.
+- The agent ID has a length check. The console no longer panics.
+- The Beacon checks the status code of every send.
+- The Beacon no longer calls `math/rand.Seed`, which does nothing after Go 1.24.
+- The Beacon no longer copies a name over `os.Args`, which never worked.
+- The code has tests, a `Makefile`, a linter configuration, and CI.
+- The documentation describes the detection side.
+
+See [docs/THREAT_MODEL.md](docs/THREAT_MODEL.md) for the full list.
+
+## Legal
+
+Use this software only on systems that you own or that you have written
+permission to test. See [CODE_OF_CONDUCT.md](CODE_OF_CONDUCT.md).
+
+Licensed under the Apache License 2.0. See [LICENSE](LICENSE).
+
+[docs/WRITING-STYLE.md]: docs/WRITING-STYLE.md

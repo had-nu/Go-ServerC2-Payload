@@ -1,42 +1,86 @@
 # Code of Conduct
 
-## Our Purpose
+## Our purpose
 
-This project is an open-source demonstration of basic C2 (Command and Control) functionality, created solely for educational purposes and ethical security research. It’s designed to help cybersecurity professionals and students understand C2 mechanisms in a safe, controlled manner. We welcome collaboration, but with an unwavering commitment to responsible, ethical, and legal use in authorised environments only.
+This project is an open-source demonstration of command and control
+functionality. It exists for education and for authorised security research.
 
-## Ethical Use Guidelines for a C2 Tool
+We welcome contributions. We hold a firm condition: every use must be
+authorised.
 
-### 1. Authorised and Controlled Use Only
-- This C2 tool must only be used in **controlled environments** where you have **explicit permission** to test—such as your own systems, networks, or lab setups explicitly designated for security research. Unauthorised use to access, manipulate, or harm systems, networks, or individuals is strictly prohibited, illegal, and can lead to severe legal, financial, and ethical consequences.  
-- Always comply with local laws, regulations, and organisational policies. Using this tool on systems or networks without consent is a criminal offence in many jurisdictions.
+## Rules for use
 
-### 2. No Malicious Use
-- This tool must not be used to develop, deploy, or support malicious activities, including but not limited to malware, ransomware, unauthorised surveillance, or cyberattacks. It is intended for **learning and defensive research**, not offensive or harmful purposes.  
-- Do not use this project to exploit vulnerabilities, disrupt services, or cause harm to any individual, organisation, or infrastructure.
+### 1. Authorised use only
 
-### 3. Transparency and Accountability
-- If using this tool for research or educational purposes, be transparent about your methods and intent. Clearly document that your activities are conducted in a controlled, authorised environment.  
-- Do not share or distribute this tool in ways that could enable misuse by others. If you suspect someone might misuse it, report it immediately (see below).
+Use this tool only in a controlled environment where you have explicit
+permission.
 
-### 4. Community Collaboration
-- We encourage contributions to this project—whether through code, feedback, or ideas—but expect all contributors to uphold these strict ethical standards.  
-- Be respectful, constructive, and inclusive in all interactions, whether on GitHub, forums, or other platforms tied to this project. Harassment, discrimination, or harmful behaviour will not be tolerated.
+- Use it on your own systems.
+- Use it on systems where the owner gave you written permission.
+- Use it in a lab that is designated for security research.
 
-## Our Commitment
+Do not use this tool on any system or network without consent. In many
+countries that use is a criminal offence.
 
-As the creator of this C2 tool, my intent is to empower cybersecurity professionals and students to learn about C2 mechanisms in a safe, ethical way. This project is not intended to enable misuse, harm, or illegal activities. I’m committed to maintaining a community where contributors and users feel safe, respected, and aligned with the project’s educational mission.
+### 2. No malicious use
 
-## Reporting Issues
+Do not use this project to develop, deploy, or support:
 
-If you encounter or suspect misuse of this tool—such as unauthorised access, malicious deployment, or unethical activities—or if you witness behaviour that violates this Code of Conduct, please report it to me directly via GitHub Issues or email (insert contact if desired). All reports will be reviewed promptly and handled with discretion.
+- malware or ransomware
+- unauthorised surveillance
+- attacks against any person, organisation, or infrastructure
 
-## Consequences of Misuse
+Do not use it to exploit a vulnerability, to interrupt a service, or to cause
+damage.
 
-- Misuse of this C2 tool in violation of these guidelines, including any malicious or unauthorised activities, will result in an immediate ban from contributing to the project.  
-- I reserve the right to report illegal activities to the appropriate authorities and cooperate fully with law enforcement if necessary.
+### 3. Transparency
 
-## Final Note
+When you use this tool for research or for education:
 
-Let’s build a community that champions ethical cybersecurity research, supports learning, and drives responsible innovation. Use this C2 tool to grow your skills and knowledge—but always with integrity, transparency, and respect for legal and ethical boundaries. Together, we can ensure this project remains a force for good in the security community.
+- state your purpose before you start
+- state that the environment is authorised and controlled
+- keep a record of the authorisation
 
-*Last updated: February 2026*
+Do not share this tool in a way that enables misuse. If you believe that
+someone will misuse it, report it. See "Reporting a problem" below.
+
+### 4. The published repository does not contain a working agent
+
+This matters for the people who clone the project.
+
+The repository publishes a **Team Server** and an **Interface Beacon**. The
+Interface Beacon prints text and stops. It runs no command.
+
+The working Beacon is in the `lab` directory. The `.gitignore` file excludes
+that directory. The working Beacon is not in the public repository.
+
+Keep it that way. Do not commit the `lab` directory. Do not remove `lab/` from
+the `.gitignore` file in a pull request.
+
+## Reporting a problem
+
+Report a suspected misuse of this tool through GitHub Security Advisories on
+the repository page.
+
+For a technical problem, open an issue.
+
+Report privately when a report names a victim, or when a report names a person
+who used the tool without authorisation.
+
+## Consequences
+
+We will remove a contribution that breaks these rules. We will close an issue
+that supports a malicious use.
+
+We will report illegal activity to the authorities. We will cooperate with a
+lawful request.
+
+## Our commitment
+
+We will keep this document current. We will keep the published repository free
+of a working agent. We will explain the defensive side of the tool in writing.
+
+## Final note
+
+Build a community that supports ethical security research. Use this tool to
+learn. Respect the boundary between a lab and someone else's system.
