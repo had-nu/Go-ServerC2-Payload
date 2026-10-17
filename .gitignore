@@ -9,8 +9,9 @@ bin/
 *.test
 *.out
 
-# The demo target writes here.
+# The demo and gate targets write here.
 .demo/
+.gates/
 
 # Local state: the shared secret and the TLS certificate
 *.key

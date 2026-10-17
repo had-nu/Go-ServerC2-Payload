@@ -62,6 +62,10 @@ Do not add features that give the Lab Beacon persistence, injection, or
 stealth beyond the process name. A pull request that adds one of those needs a
 reason in the description.
 
+Do not remove the build tag or the flag `-i-run-remote-commands`. The target
+`make verify-gates` checks both gates. A pull request that removes a gate must
+explain the reason.
+
 ## Reporting a problem
 
 Report a suspected misuse of this tool through GitHub Security Advisories on

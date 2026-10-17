@@ -67,7 +67,11 @@ say "listening on $(grep -o 'listening on .*' "$SERVER_LOG" | head -1 | sed 's/l
 say "secret: $STATE/c2.key"
 
 step "2 of 6  start the Lab Beacon"
+say "flag: -i-run-remote-commands (the acknowledgement gate)"
+# The acknowledgement flag is the second gate. Without it the beacon checks in,
+# registers, and refuses every task. docs/LAB.md explains both gates.
 ./bin/beacon \
+  -i-run-remote-commands \
   -server "https://127.0.0.1:$PORT" \
   -secret-file "$STATE/c2.key" \
   -ca "$STATE/team-server.crt" \

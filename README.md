@@ -22,14 +22,30 @@ architecture works, and how it looks from the defender side.
 | Lab Beacon | `lab/beacon-impl` | Yes. It runs what the operator sends. |
 | Interface Beacon | `cmd/beacon` | No. It prints text and stops. |
 
-The working Beacon is in `lab/beacon-impl`. It is in this repository. It needs
-a Team Server and the shared secret before it does anything. See
-[docs/THREAT_MODEL.md](docs/THREAT_MODEL.md).
+## The two gates
+
+A command runs only after two deliberate acts.
+
+| Gate | What it is | What it stops |
+|---|---|---|
+| 1 | The build tag `lab` | The default build has no network code. |
+| 2 | The flag `-i-run-remote-commands` | A tagged binary checks in, then refuses every task. |
+
+```bash
+make verify-gates    # builds both, reads the symbols, starts one unarmed
+```
+
+The default build of the Lab Beacon is 2.5 MB and holds no network symbol. The
+tagged build is 10.5 MB. [docs/LAB.md](docs/LAB.md) explains both gates and
+gives the full procedure.
+
+See [docs/THREAT_MODEL.md](docs/THREAT_MODEL.md) for what an attacker can do.
 
 ## The documentation
 
 | Document | Purpose |
 |---|---|
+| [docs/LAB.md](docs/LAB.md) | **Start here.** The step-by-step procedure and the two gates |
 | [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md) | How the two programs exchange data |
 | [docs/DETECTION.md](docs/DETECTION.md) | How to detect the technique |
 | [docs/IOC.md](docs/IOC.md) | The values that a defender searches for |
@@ -71,6 +87,7 @@ The state of the demo is in `.demo`. Run `make clean` to remove it.
 ```bash
 make build          # bin/team-server and bin/beacon-stub
 make lab-beacon     # bin/beacon, the program that runs commands
+make inert-beacon   # bin/beacon-inert, the build that runs nothing
 ```
 
 ## Run the Team Server
@@ -137,6 +154,7 @@ Run the Lab Beacon in a second terminal:
 
 ```bash
 ./bin/beacon \
+  -i-run-remote-commands \
   -server https://127.0.0.1:8443 \
   -secret-file .state/c2.key \
   -ca .state/team-server.crt \
@@ -216,7 +234,9 @@ directive to that line:
 | `make help` | List the targets |
 | `make demo` | Run the whole cycle and exit |
 | `make build` | Build the Team Server and the interface Beacon |
-| `make lab-beacon` | Build the Lab Beacon |
+| `make lab-beacon` | Build the Lab Beacon with the tag |
+| `make inert-beacon` | Build and run the build that runs nothing |
+| `make verify-gates` | EXAMINE that both gates hold |
 | `make run-server` | Start the Team Server on `127.0.0.1:8443` |
 | `make show-secret` | Print the shared secret |
 | `make check` | Run the format check, vet, tests, and the style check |

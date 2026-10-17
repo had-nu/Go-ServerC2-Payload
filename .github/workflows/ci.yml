@@ -99,6 +99,9 @@ jobs:
           go build -o bin/beacon-stub ./cmd/beacon
           go build -ldflags="-s -w" -o bin/beacon ./lab/beacon-impl
 
+      - name: check the two gates
+        run: ./scripts/verify-gates.sh
+
       - name: confirm that the interface beacon runs no task
         run: |
           set -e

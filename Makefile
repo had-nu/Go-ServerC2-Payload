@@ -18,8 +18,12 @@ build: ## build the published programs
 	@echo "built: $(BIN)/team-server $(BIN)/beacon-stub"
 
 .PHONY: lab-beacon
-lab-beacon: ## build the Lab Beacon, the program that runs commands
-	$(GO) build -ldflags="-s -w" -o $(BIN)/beacon ./lab/beacon-impl
+lab-beacon: ## build the Lab Beacon with the "lab" tag
+	$(GO) build -tags lab -ldflags="-s -w" -o $(BIN)/beacon ./lab/beacon-impl
+
+inert-beacon: ## build the Lab Beacon without the tag, so that it runs nothing
+	$(GO) build -o $(BIN)/beacon-inert ./lab/beacon-impl
+	@$(BIN)/beacon-inert
 
 .PHONY: strip-beacon
 strip-beacon: lab-beacon ## report the size of the working Beacon
@@ -70,7 +74,7 @@ tidy: ## tidy the module files
 	$(GO) mod tidy
 
 .PHONY: check
-check: fmt-check vet test ste ## run every check that CI runs
+check: fmt-check vet test ste verify-gates ## run every check that CI runs
 
 .PHONY: run-server
 run-server: build ## run the Team Server on 127.0.0.1:8443
@@ -86,5 +90,9 @@ demo: build lab-beacon ## run the Team Server and the Lab Beacon, then exit
 	@printf 'id\n' > $(DEMO_DIR)/cmds.txt
 	@./scripts/demo.sh $(DEMO_DIR) $(DEMO_PORT)
 
+.PHONY: verify-gates
+verify-gates: ## EXAMINE that the build tag and the acknowledgement flag both hold
+	@./scripts/verify-gates.sh
+
 clean: ## remove build output
-	rm -rf $(BIN) $(DEMO_DIR) coverage.out
+	rm -rf $(BIN) $(DEMO_DIR) .gates coverage.out
