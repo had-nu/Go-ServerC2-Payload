@@ -124,11 +124,7 @@ var contractionPattern = regexp.MustCompile(`(?i)\b(?:` + strings.Join(contracti
 
 // Contractions returns the contractions in a text. Rule 4.2 does not allow them.
 func Contractions(text string) []string {
-	var out []string
-	for _, m := range contractionPattern.FindAllString(text, -1) {
-		out = append(out, m)
-	}
-	return out
+	return contractionPattern.FindAllString(text, -1)
 }
 
 // Semicolons returns the positions of the semicolons. Rule 8.1 does not allow
@@ -149,11 +145,7 @@ var ingWord = regexp.MustCompile(`\b[A-Za-z]+ing\b`)
 // as a technical noun or inside a technical noun, so a program cannot decide
 // the case. The caller must review each result.
 func IngestiveForms(text string) []string {
-	var out []string
-	for _, m := range ingWord.FindAllString(text, -1) {
-		out = append(out, m)
-	}
-	return out
+	return ingWord.FindAllString(text, -1)
 }
 
 // quantityWord follows ABOUT in the restricted meaning that the dictionary
@@ -164,11 +156,7 @@ var quantityAfterAbout = regexp.MustCompile(`(?i)\bABOUT\s+(\d|about\s+\d|one|tw
 // AboutAsApproximate returns the fragments where ABOUT seems to carry the
 // meaning that the dictionary gives to APPROXIMATELY.
 func AboutAsApproximate(text string) []string {
-	var out []string
-	for _, m := range quantityAfterAbout.FindAllString(text, -1) {
-		out = append(out, m)
-	}
-	return out
+	return quantityAfterAbout.FindAllString(text, -1)
 }
 
 var unapprovedModal = regexp.MustCompile(`(?i)\b(MAY|MIGHT|COULD|SHALL|SHOULD|OUGHT)\b`)

@@ -11,7 +11,6 @@ var (
 	refLink     = regexp.MustCompile(`\[([^\]]*)\]\[[^\]]*\]`)
 	boldItalic  = regexp.MustCompile(`\*\*|\*\*|__|\*|~~`)
 	image       = regexp.MustCompile(`!\[[^\]]*\]\([^)]*\)`)
-	linkDef     = regexp.MustCompile(`^\[[^\]]+\]:`)
 	htmlComment = regexp.MustCompile(`<!--.*?-->`)
 )
 

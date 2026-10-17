@@ -15,6 +15,7 @@ package main
 import (
 	"fmt"
 	"os"
+	"reflect"
 	"runtime"
 	"time"
 )
@@ -44,25 +45,41 @@ const (
 	RetryDelay = 2 * time.Second
 )
 
-// agentID identifies this Beacon to the Team Server. The Team Server rejects
-// an ID with fewer than 8 characters.
-var agentID string
-
-// hostname is the name of the host where the Beacon runs.
-var hostname string
-
-// startTime lets the Beacon report how long it has run.
-var startTime = time.Now()
+// The stub declares the functions of a Beacon. Nothing calls them, because the
+// stub runs nothing. The interface slice below holds them so that the compiler
+// and the linter keep them, and so that main can report the shape of the
+// program to a reader.
+//
+// The functions are the interface. The state that a working Beacon keeps, the
+// identifier and the host name, is not an interface, so the stub does not
+// declare it. The working program keeps that state in lab/beacon-impl.
+var interfaceFuncs = []any{
+	getSleepDuration,
+	checkIn,
+	postResults,
+	runTask,
+	setProcessName,
+}
 
 func main() {
 	fmt.Println("beacon: this is the interface stub, not a working agent")
 	fmt.Printf("beacon: it would check in to %s every %s with %d%% jitter\n",
 		DefaultServerURL, DefaultSleep, DefaultJitter)
-	fmt.Printf("beacon: functions declared here: init, checkIn, postResults, runTask, setProcessName, main\n")
+	fmt.Printf("beacon: the stub declares %d functions: init, main, and %d more\n",
+		len(interfaceFuncs)+2, len(interfaceFuncs))
+	for _, f := range interfaceFuncs {
+		fmt.Printf("beacon:   %s\n", nameOf(f))
+	}
 	fmt.Printf("beacon: go version %s, platform %s/%s\n", runtime.Version(), runtime.GOOS, runtime.GOARCH)
 	fmt.Println("beacon: read docs/ARCHITECTURE.md for the sequence of calls")
 	fmt.Println("beacon: read docs/DETECTION.md for what this traffic looks like")
+	fmt.Println("beacon: read docs/LAB.md to build and run the Lab Beacon")
 	_ = os.Stdout
+}
+
+// nameOf returns the name of a function value.
+func nameOf(f any) string {
+	return runtime.FuncForPC(reflect.ValueOf(f).Pointer()).Name()
 }
 
 // init makes a unique identifier, reads the host name, and starts the random
