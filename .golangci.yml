@@ -1,0 +1,48 @@
+# Linters that need configuration are listed here. staticcheck and gosec read
+# their own configuration or the command line.
+#
+# This file is for golangci-lint. The project passes gofmt, go vet, staticcheck
+# and gosec without it, so it is optional.
+run:
+  timeout: 5m
+
+linters:
+  enable:
+    - errcheck
+    - govet
+    - ineffassign
+    - staticcheck
+    - unused
+    - gosec
+    - misspell
+    - bodyclose
+    - errorlint
+    - gocritic
+
+issues:
+  exclude-dirs:
+    - lab
+  exclude-rules:
+    # The Beacon runs the command that the operator sends. That is the purpose
+    # of a C2. The handler requires the shared secret.
+    - path: lab/beacon-impl/main\.go
+      linters:
+        - gosec
+        - gocritic
+    # A closing response body has no error that the caller can use.
+    - linters:
+        - errcheck
+      text: 'Error return value of .((os\.)?std(out|err)\..*|.*Close|.*Flush|os\.Remove(All)?|.*print(f|ln)?|os\.(Un)?Setenv). is not checked'
+
+linters-settings:
+  gosec:
+    excludes:
+      # The Beacon sends commands to a shell. The Team Server is the only
+      # source of those commands and it requires the shared secret.
+      - G204
+      # math/rand is correct for the jitter. The jitter does not need a
+      # cryptographic source.
+      - G404
+      # The lab Beacon does not verify the Team Server certificate by default.
+      # A lab has no certificate authority.
+      - G402
